@@ -1,0 +1,84 @@
+services:
+  api: &main_app
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    image: scaledp_chat:${SCALEDP_CHAT_VERSION:-latest}
+    restart: always
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+      rmq:
+        condition: service_healthy
+    environment:
+      SCALEDP_CHAT_HOST: 0.0.0.0
+      SCALEDP_CHAT_DB_HOST: scaledp_chat-db
+      SCALEDP_CHAT_DB_PORT: 5432
+      SCALEDP_CHAT_DB_USER: scaledp_chat
+      SCALEDP_CHAT_DB_PASS: scaledp_chat
+      SCALEDP_CHAT_DB_BASE: scaledp_chat
+      SCALEDP_CHAT_RABBIT_HOST: scaledp_chat-rmq
+
+  taskiq-worker:
+    <<: *main_app
+    labels: []
+    command:
+      - taskiq
+      - worker
+      - scaledp_chat.tkq:broker
+
+  db:
+    image: pgvector/pgvector:pg16
+    hostname: scaledp_chat-db
+    environment:
+      POSTGRES_PASSWORD: "scaledp_chat"
+      POSTGRES_USER: "scaledp_chat"
+      POSTGRES_DB: "scaledp_chat"
+    ports:
+      - "5434:5432"
+    volumes:
+      - scaledp_chat-db-data:/var/lib/postgresql/data
+    restart: always
+    healthcheck:
+      test: pg_isready -U scaledp_chat
+      interval: 2s
+      timeout: 3s
+      retries: 40
+
+  migrator:
+    image: scaledp_chat:${SCALEDP_CHAT_VERSION:-latest}
+    restart: "no"
+    command: alembic upgrade head
+    environment:
+      SCALEDP_CHAT_DB_HOST: scaledp_chat-db
+      SCALEDP_CHAT_DB_PORT: 5432
+      SCALEDP_CHAT_DB_USER: scaledp_chat
+      SCALEDP_CHAT_DB_PASS: scaledp_chat
+      SCALEDP_CHAT_DB_BASE: scaledp_chat
+    depends_on:
+      db:
+        condition: service_healthy
+
+  rmq:
+    image: rabbitmq:3.9.16-alpine
+    hostname: "scaledp_chat-rmq"
+    restart: always
+    environment:
+      RABBITMQ_DEFAULT_USER: "guest"
+      RABBITMQ_DEFAULT_PASS: "guest"
+      RABBITMQ_DEFAULT_VHOST: "/"
+    ports:
+      - "5672:5672"
+    healthcheck:
+      test: rabbitmq-diagnostics check_running -q
+      interval: 3s
+      timeout: 3s
+      retries: 50
+
+
+
+volumes:
+  scaledp_chat-db-data:
+    name: scaledp_chat-db-data

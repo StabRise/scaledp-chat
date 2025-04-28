@@ -1,0 +1,43 @@
+name: Testing scaledp_chat
+
+on: push
+
+jobs:
+  lint:
+    strategy:
+      matrix:
+        cmd:
+          - black
+          - ruff
+          - mypy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install poetry
+        run: pipx install poetry
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'poetry'
+      - name: Install deps
+        run: poetry install
+      - name: Run lint check
+        run: poetry run pre-commit run -a ${{ matrix.cmd }}
+  pytest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create .env
+        run: touch .env
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Update docker-compose
+        uses: KengoTODA/actions-setup-docker-compose@v1
+        with:
+          version: "2.28.0"
+      - name: run tests
+        run: docker-compose run --rm api pytest -vv
+
