@@ -83,6 +83,7 @@ env = [
     "SCALEDP_CHAT_DB_BASE=scaledp_chat_test",
     "SCALEDP_CHAT_SENTRY_DSN=",
 ]
+addopts = "--ignore=repos"
 
 [tool.ruff]
 # List of enabled rulsets.
@@ -133,7 +134,8 @@ lint.ignore = [
 exclude = [
     "scaledp_chat/db/migrations",
     "scaledp_chat/web/api/chat",
-    ".venv/"
+    ".venv/",
+    "repos/"
 ]
 lint.mccabe = { max-complexity = 10 }
 line-length = 88
