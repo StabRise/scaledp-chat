@@ -9,6 +9,7 @@ from fastapi.staticfiles import StaticFiles
 from sentry_sdk.integrations.fastapi import FastApiIntegration
 from sentry_sdk.integrations.logging import LoggingIntegration
 from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
+from starlette.middleware.cors import CORSMiddleware
 
 from scaledp_chat.log import configure_logging
 from scaledp_chat.settings import settings
@@ -59,5 +60,19 @@ def get_app() -> FastAPI:
     # Adds static directory.
     # This directory is used to access swagger files.
     app.mount("/static", StaticFiles(directory=APP_ROOT / "static"), name="static")
+
+    origins = [
+        "https://stabrise.com",  # Replace with your allowed origins
+        "http://localhost:3001",
+        "http://localhost:3000",
+    ]
+
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=origins,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
     return app
