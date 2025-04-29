@@ -69,8 +69,8 @@ class Settings(BaseSettings):
 
     # open ai configuration
     openai_api_key: SecretStr | None = None
-    openai_model: str = "gpt-3.5-turbo"
-    openai_base_url: str = "https://api.openai.com/v1"
+    openai_model: str = "gemini-2.0-flash"
+    openai_base_url: str = "https://generativelanguage.googleapis.com/v1beta/"
 
     @property
     def db_url(self) -> URL:
