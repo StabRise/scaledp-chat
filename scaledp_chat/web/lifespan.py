@@ -28,6 +28,12 @@ def _setup_db(app: FastAPI) -> None:  # pragma: no cover
     app.state.db_session_factory = session_factory
 
 
+def _setup_vector_store(app: FastAPI) -> None:
+    from scaledp_chat.web.api.chat.vector_store import get_vector_store
+
+    app.state.vector_store = get_vector_store()
+
+
 @asynccontextmanager
 async def lifespan_setup(
     app: FastAPI,
@@ -46,6 +52,7 @@ async def lifespan_setup(
     if not broker.is_worker_process:
         await broker.startup()
     _setup_db(app)
+    _setup_vector_store(app)
     init_rabbit(app)
     app.middleware_stack = app.build_middleware_stack()
 

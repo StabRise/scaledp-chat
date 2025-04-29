@@ -8,6 +8,7 @@ from aio_pika.abc import AbstractExchange, AbstractQueue
 from aio_pika.pool import Pool
 from fastapi import FastAPI
 from httpx import AsyncClient
+from langchain_postgres import PGVectorStore
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
@@ -16,7 +17,7 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
-from scaledp_chat.db.dependencies import get_db_session
+from scaledp_chat.db.dependencies import get_db_session, get_vector_db_session
 from scaledp_chat.db.utils import create_database, drop_database
 from scaledp_chat.services.rabbit.dependencies import get_rmq_channel_pool
 from scaledp_chat.services.rabbit.lifespan import init_rabbit, shutdown_rabbit
@@ -88,6 +89,29 @@ async def dbsession(
         await session.close()
         await trans.rollback()
         await connection.close()
+
+
+@pytest.fixture
+async def vector_store(
+    _engine: AsyncEngine,
+) -> AsyncGenerator[AsyncSession, None]:
+    """
+    Get session to database.
+
+    Fixture that returns a SQLAlchemy session with a SAVEPOINT, and the rollback to it
+    after the test completes.
+
+    :param _engine: current engine.
+    :yields: async session.
+    """
+
+    from scaledp_chat.web.api.chat.vector_store import aget_vector_store
+
+    vector_store = await aget_vector_store(_engine)
+    try:
+        yield vector_store
+    finally:
+        del vector_store
 
 
 @pytest.fixture
@@ -187,6 +211,24 @@ def fastapi_app(
 
 
 @pytest.fixture
+def fastapi_app_with_vector_store(
+    dbsession: AsyncSession,
+    vector_store: PGVectorStore,
+    test_rmq_pool: Pool[Channel],
+) -> FastAPI:
+    """
+    Fixture for creating FastAPI app.
+
+    :return: fastapi app with mocked dependencies.
+    """
+    application = get_app()
+    application.dependency_overrides[get_db_session] = lambda: dbsession
+    application.dependency_overrides[get_vector_db_session] = lambda: vector_store
+    application.dependency_overrides[get_rmq_channel_pool] = lambda: test_rmq_pool
+    return application
+
+
+@pytest.fixture
 async def client(
     fastapi_app: FastAPI,
     anyio_backend: Any,
@@ -198,4 +240,23 @@ async def client(
     :yield: client for the app.
     """
     async with AsyncClient(app=fastapi_app, base_url="http://test", timeout=2.0) as ac:
+        yield ac
+
+
+@pytest.fixture
+async def client_with_vector_store(
+    fastapi_app_with_vector_store: FastAPI,
+    anyio_backend: Any,
+) -> AsyncGenerator[AsyncClient, None]:
+    """
+    Fixture that creates client for requesting server.
+
+    :param fastapi_app_with_vector_store: the application.
+    :yield: client for the app.
+    """
+    async with AsyncClient(
+        app=fastapi_app_with_vector_store,
+        base_url="http://test",
+        timeout=2.0,
+    ) as ac:
         yield ac

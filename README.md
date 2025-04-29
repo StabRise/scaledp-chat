@@ -105,6 +105,11 @@ By default it runs:
 
 You can read more about pre-commit here: https://pre-commit.com/
 
+To run pre-commit on all files:
+```bash
+pre-commit run --all-files
+```
+
 ## Migrations
 
 If you want to migrate your database, you should run following commands:

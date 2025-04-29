@@ -3,6 +3,7 @@ from pathlib import Path
 from tempfile import gettempdir
 from typing import Optional
 
+from pydantic import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from yarl import URL
 
@@ -65,6 +66,11 @@ class Settings(BaseSettings):
     embeddings_model: str = "HIT-TMG/KaLM-embedding-multilingual-mini-instruct-v1.5"
 
     repo_url: str = "https://github.com/StabRise/ScaleDP.git"
+
+    # open ai configuration
+    openai_api_key: SecretStr | None = None
+    openai_model: str = "gpt-3.5-turbo"
+    openai_base_url: str = "https://api.openai.com/v1"
 
     @property
     def db_url(self) -> URL:
