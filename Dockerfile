@@ -1,5 +1,6 @@
 FROM python:3.11.4-slim-bullseye AS prod
 RUN apt-get update && apt-get install -y \
+  libpq-dev \
   gcc \
   && rm -rf /var/lib/apt/lists/*
 

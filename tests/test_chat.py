@@ -37,7 +37,7 @@ def mock_build_graph(
     mock_graph = Mock()
     mock_graph.astream.return_value = mock_graph_response
 
-    def mock_build() -> Mock:
+    def mock_build(vector_store: PGVectorStore, session: AsyncSession) -> Mock:
         return mock_graph
 
     monkeypatch.setattr(
