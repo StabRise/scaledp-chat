@@ -21,6 +21,9 @@ services:
       SCALEDP_CHAT_DB_BASE: scaledp_chat
       SCALEDP_CHAT_RABBIT_HOST: scaledp_chat-rmq
 
+    networks:
+      - scaledp-network
+
   taskiq-worker:
     <<: *main_app
     labels: []
@@ -28,6 +31,8 @@ services:
       - taskiq
       - worker
       - scaledp_chat.tkq:broker
+    networks:
+      - scaledp-network
 
   db:
     image: pgvector/pgvector:pg16
@@ -46,6 +51,8 @@ services:
       interval: 2s
       timeout: 3s
       retries: 40
+    networks:
+      - scaledp-network
 
   migrator:
     image: scaledp_chat:${SCALEDP_CHAT_VERSION:-latest}
@@ -60,6 +67,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    networks:
+      - scaledp-network
 
   rmq:
     image: rabbitmq:3.9.16-alpine
@@ -76,9 +85,17 @@ services:
       interval: 3s
       timeout: 3s
       retries: 50
+    networks:
+      - scaledp-network
 
 
 
 volumes:
   scaledp_chat-db-data:
     name: scaledp_chat-db-data
+
+
+networks:
+  scaledp-network:
+    external: true
+    name: deidentify-site_deidentifynet
