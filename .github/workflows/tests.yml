@@ -32,6 +32,7 @@ jobs:
         uses: SpicyPizza/create-envfile@v2.0
         with:
           envkey_SCALEDP_CHAT_OPENAI_API_KEY: ${{ secrets.SCALEDP_CHAT_OPENAI_API_KEY }}
+          envkey_SCALEDP_CHAT_TOGETHERAI_EMBEDDINGS_API_KEY: ${{ secrets.SCALEDP_CHAT_TOGETHERAI_EMBEDDINGS_API_KEY }}
           file_name: .env
       - name: Set up Python
         uses: actions/setup-python@v5
