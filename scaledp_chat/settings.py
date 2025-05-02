@@ -62,12 +62,17 @@ class Settings(BaseSettings):
     sentry_dsn: Optional[str] = None
     sentry_sample_rate: float = 1.0
 
-    embeddings_vector_size: int = 896
-    embeddings_model: str = "HIT-TMG/KaLM-embedding-multilingual-mini-instruct-v1.5"
+    # Embeddings
+    # https://huggingface.co/BAAI/bge-base-en-v1.5
+    embeddings_vector_size: int = 768
+    embeddings_model: str = "BAAI/bge-base-en-v1.5"
+
+    togetherai_embeddings_model: str = "BAAI/bge-base-en-v1.5"
+    togetherai_embeddings_api_key: SecretStr | None = None
 
     repo_url: str = "https://github.com/StabRise/ScaleDP.git"
 
-    # open ai configuration
+    # LLM
     openai_api_key: SecretStr | None = None
     openai_model: str = "gemini-2.0-flash"
     openai_base_url: str = "https://generativelanguage.googleapis.com/v1beta/"

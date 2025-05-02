@@ -1,7 +1,7 @@
 from typing import Optional
 
-from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_postgres import PGEngine, PGVectorStore
+from langchain_together import TogetherEmbeddings
 from sqlalchemy.ext.asyncio import AsyncEngine
 
 from scaledp_chat.db.models.document_index import DocumentIndexModel
@@ -19,7 +19,10 @@ def get_vector_store(pg_engine: Optional[AsyncEngine] = None) -> PGVectorStore:
             - Document index table name from DocumentIndexModel
     """
 
-    embeddings = HuggingFaceEmbeddings(model_name=settings.embeddings_model)
+    embeddings = TogetherEmbeddings(
+        model=settings.togetherai_embeddings_model,
+        api_key=settings.togetherai_embeddings_api_key,
+    )
 
     if pg_engine is None:
         engine = PGEngine.from_connection_string(str(settings.db_url))
@@ -48,7 +51,10 @@ async def aget_vector_store(pg_engine: Optional[AsyncEngine] = None) -> PGVector
             - Document index table name from DocumentIndexModel
     """
 
-    embeddings = HuggingFaceEmbeddings(model_name=settings.embeddings_model)
+    embeddings = TogetherEmbeddings(
+        model=settings.togetherai_embeddings_model,
+        api_key=settings.togetherai_embeddings_api_key,
+    )
 
     if pg_engine is None:
         engine = PGEngine.from_connection_string(str(settings.db_url))

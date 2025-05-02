@@ -7,19 +7,19 @@ It is FastAPI RAG backend based on (LangGraph and LangCain) for the frontend
 chat based on [AI SDK](https://sdk.vercel.ai/)
 
 Project is using:
- - FastAPI as backend framework
- - LangChain/LangGraph as AI framework to build RAG
- - Huggingface Transformers model for embeddings
- - Swagger UI for API documentation
- - SQLAlchemy as ORM
- - PostgreSQL with PGVector extension as Vector Store
- - Alembic for DB migrations
- - Poetry as project/dependency manager
- - Pytest for testing
- - Ruff/Black/MyPY for linting and formatting
- - Pre-commit for pre-commit hooks
- - Docker/Docker Compose for containerization
- - GitHub Actions for CI/CD
+ - **FastAPI** as backend framework
+ - **LangChain/LangGraph** as AI framework to build RAG
+ - **Huggingface Transformers** model for embeddings
+ - **Swagger UI** for API documentation
+ - **SQLAlchemy** as ORM
+ - **PostgreSQL** with **PGVector** extension as Vector Store
+ - **Alembic** for DB migrations
+ - **Poetry** as project/dependency manager
+ - **Pytest** for testing
+ - **Ruff/Black/MyPY** for linting and formatting
+ - **Pre-commit** for pre-commit hooks
+ - **Docker/Docker Compose** for containerization
+ - **GitHub Actions** for **CI/CD**
 
 Project contains test coverage for 'chat' endpoint.
 
@@ -186,4 +186,10 @@ docker run -p "5432:5432" -e "POSTGRES_PASSWORD=scaledp_chat" -e "POSTGRES_USER=
 2. Run the pytest.
 ```bash
 pytest -vv .
+```
+
+## Create index for the repo
+
+```bash
+poetry run python ./scripts/create_index.py
 ```
