@@ -10,8 +10,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
-      #rmq:
-      #  condition: service_healthy
+      rmq:
+        condition: service_healthy
     environment:
       SCALEDP_CHAT_HOST: 0.0.0.0
       SCALEDP_CHAT_DB_HOST: scaledp_chat-db
