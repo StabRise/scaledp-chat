@@ -66,12 +66,13 @@ async def chat(
         Yields:
             str: Formatted JSON strings containing the AI's responses.
         """
-        async for event in graph.astream(
+        async for event, metadata in graph.astream(
             {"messages": messages},
             config=config,
             stream_mode="messages",
         ):
-            yield "0:{text}\n".format(text=json.dumps(event[0].content))  # type: ignore
+            if "generator" in metadata.get("tags", []):  # type: ignore
+                yield "0:{text}\n".format(text=json.dumps(event.content))  # type: ignore
 
     # Create and configure the streaming response
     response: StreamingResponse = StreamingResponse(

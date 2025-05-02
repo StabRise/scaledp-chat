@@ -12,7 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing_extensions import List, TypedDict
 
 from scaledp_chat.db.models.document_index import DocumentFileModel
-from scaledp_chat.web.api.chat.llm import llm
+from scaledp_chat.web.api.chat.llm import generator_llm, retrieve_llm
 from scaledp_chat.web.api.chat.prompts import defenition_prompt, rag_prompt
 
 
@@ -59,10 +59,12 @@ async def retrieve(
 
     # Extract key terms using LLM
     messages = defenition_prompt.invoke({"question": question})
-    response = llm.invoke(messages.to_messages())
+    response = retrieve_llm.invoke(messages.to_messages())
 
     # Add system keywords to search terms
-    defenitions = response.content[0] + ", ScaleDPSession, show_image, show_text"  # type: ignore
+    defenitions = response.content[0] + (  # type: ignore
+        ", ScaleDPSession, DataToImage, show_image,how_text"
+    )
 
     # Perform semantic search
     retrieved_docs: List[Document] = await vector_store.asimilarity_search(
@@ -123,7 +125,7 @@ async def generate(state: State, db_session: AsyncSession) -> Dict[str, Any]:
     messages = rag_prompt.invoke({"question": question, "context": docs_content})
 
     # Generate response using the LLM
-    response = llm.invoke(state["messages"] + messages.to_messages())
+    response = await generator_llm.ainvoke(state["messages"] + messages.to_messages())
 
     return {"answer": response.content}
 
