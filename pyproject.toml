@@ -50,7 +50,6 @@ anyio = "^4"
 pytest-env = "^1.1.3"
 httpx = "^0.27.0"
 taskiq = { version = "^0", extras = ["reload"] }
-langchain-huggingface = "^0.1.2"
 
 [tool.isort]
 profile = "black"

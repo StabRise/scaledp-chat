@@ -97,4 +97,5 @@ volumes:
 
 networks:
   scaledp-network:
-    external: false
+    external: true
+    name: deidentify-site_deidentifynet
