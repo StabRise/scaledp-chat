@@ -21,6 +21,9 @@ services:
       SCALEDP_CHAT_DB_BASE: scaledp_chat
       SCALEDP_CHAT_RABBIT_HOST: scaledp_chat-rmq
 
+    ports:
+      - "8000:8000"
+
     networks:
       - scaledp-network
 
@@ -41,8 +44,6 @@ services:
       POSTGRES_PASSWORD: "scaledp_chat"
       POSTGRES_USER: "scaledp_chat"
       POSTGRES_DB: "scaledp_chat"
-    ports:
-      - "5434:5432"
     volumes:
       - scaledp_chat-db-data:/var/lib/postgresql/data
     restart: always
