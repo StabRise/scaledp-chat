@@ -53,7 +53,8 @@ async def lifespan_setup(
         await broker.startup()
     _setup_db(app)
     _setup_vector_store(app)
-    init_rabbit(app)
+    if settings.with_taskiq:
+        init_rabbit(app)
     app.middleware_stack = app.build_middleware_stack()
 
     yield
