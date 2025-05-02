@@ -13,7 +13,7 @@ from typing_extensions import List, TypedDict
 
 from scaledp_chat.db.models.document_index import DocumentFileModel
 from scaledp_chat.web.api.chat.llm import llm
-from scaledp_chat.web.api.chat.prompts import rag_prompt
+from scaledp_chat.web.api.chat.prompts import defenition_prompt, rag_prompt
 
 
 class State(TypedDict):
@@ -29,26 +29,47 @@ async def retrieve(
     vector_store: PGVectorStore,
 ) -> Dict[str, List[Document]]:
     """
-    Retrieve relevant documents based on the user's question using similarity search.
+    Retrieve relevant documents based on the user's question using semantic search.
 
     Args:
         state (State): The current conversation state containing:
-            - messages (List[BaseMessage]): List of conversation messages
-            - context (List[Document]): List of retrieved documents
-            - answer (str): Generated response string
-        vector_store (PGVectorStore): PostgreSQL vector store for similarity search
+            - messages (List[BaseMessage]): Conversation history
+            - context (List[Document]): Previously retrieved documents
+            - answer (str): Last generated response
+        vector_store (PGVectorStore): PostgreSQL vector store for semantic search
 
     Returns:
-        Dict[str, List[Document]]: Dictionary with key "context" containing list of
-            retrieved documents matching the query
+        Dict[str, List[Document]]: Dictionary with key "context" containing the most
+            relevant documents for the query
 
-    The function performs these steps:
-    1. Extracts the latest question from the conversation messages
-    2. Performs an asynchronous similarity search using the vector store
-    3. Returns the retrieved documents as context
+    The function:
+    1. Extracts the latest user question from conversation history
+    2. Uses LLM to extract key terms and concepts from the question
+    3. Augments search terms with common system keywords
+    4. Performs semantic similarity search to find relevant documents
+    5. Returns top matching documents as context for answer generation
+
+    Notes:
+        - Uses defenition_prompt to extract search terms from question
+        - Adds system-specific keywords to improve document retrieval
+        - Returns top 10 most semantically similar documents
     """
+    # Get latest question from conversation
     question: str = state["messages"][-1].content[0]["text"]  # type: ignore
-    retrieved_docs: List[Document] = await vector_store.asimilarity_search(question)
+
+    # Extract key terms using LLM
+    messages = defenition_prompt.invoke({"question": question})
+    response = llm.invoke(messages.to_messages())
+
+    # Add system keywords to search terms
+    defenitions = response.content[0] + ", ScaleDPSession, show_image, show_text"  # type: ignore
+
+    # Perform semantic search
+    retrieved_docs: List[Document] = await vector_store.asimilarity_search(
+        defenitions,
+        k=10,
+    )
+
     return {"context": retrieved_docs}
 
 
