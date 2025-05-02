@@ -1,4 +1,3 @@
-import asyncio
 import json
 from typing import AsyncGenerator
 
@@ -72,8 +71,6 @@ async def chat(
             config=config,
             stream_mode="messages",
         ):
-            # Add a small delay between messages for better UX
-            await asyncio.sleep(0.05)
             yield "0:{text}\n".format(text=json.dumps(event[0].content))  # type: ignore
 
     # Create and configure the streaming response

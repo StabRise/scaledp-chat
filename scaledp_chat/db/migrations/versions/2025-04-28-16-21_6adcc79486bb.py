@@ -29,7 +29,7 @@ def upgrade() -> None:
         sa.Column("content", sa.Text(), nullable=False),
         sa.Column(
             "embedding",
-            pgvector.sqlalchemy.vector.VECTOR(dim=896),
+            pgvector.sqlalchemy.vector.VECTOR(dim=768),
             nullable=False,
         ),
         sa.Column("langchain_metadata", sa.JSON(), nullable=False),
