@@ -49,7 +49,7 @@ async def lifespan_setup(
     """
 
     app.middleware_stack = None
-    if not broker.is_worker_process:
+    if settings.with_taskiq and not broker.is_worker_process:
         await broker.startup()
     _setup_db(app)
     _setup_vector_store(app)
