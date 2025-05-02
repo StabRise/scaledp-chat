@@ -27,15 +27,15 @@ services:
     networks:
       - scaledp-network
 
-  taskiq-worker:
-    <<: *main_app
-    labels: []
-    command:
-      - taskiq
-      - worker
-      - scaledp_chat.tkq:broker
-    networks:
-      - scaledp-network
+#  taskiq-worker:
+#    <<: *main_app
+#    labels: []
+#    command:
+#      - taskiq
+#      - worker
+#      - scaledp_chat.tkq:broker
+#    networks:
+#      - scaledp-network
 
   db:
     image: pgvector/pgvector:pg16
@@ -54,6 +54,9 @@ services:
       retries: 40
     networks:
       - scaledp-network
+
+    ports:
+      - "5432:5432"
 
   migrator:
     image: scaledp_chat:${SCALEDP_CHAT_VERSION:-latest}
