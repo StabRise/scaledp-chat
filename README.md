@@ -1,5 +1,7 @@
 # ScaleDP Chat
 
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/6c67bee8a3c5478389d36b1239126b1c)](https://app.codacy.com/gh/StabRise/scaledp-chat/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
+
 This is backend project for [ScaleDP](https://stabrise.com/scaledp/) Chat.
 Chat over the [ScaleDP git repository](https://github.com/StabRise/ScaleDP/).
 
