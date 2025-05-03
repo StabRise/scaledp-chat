@@ -1,3 +1,4 @@
+import logging
 from functools import partial
 from typing import Annotated, Any, Dict
 
@@ -29,48 +30,72 @@ async def retrieve(
     vector_store: PGVectorStore,
 ) -> Dict[str, List[Document]]:
     """
-    Retrieve relevant documents based on the user's question using semantic search.
-
+    Retrieve relevant documents using semantic search based on user queries
+     and extracted concepts.
     Args:
         state (State): The current conversation state containing:
-            - messages (List[BaseMessage]): Conversation history
-            - context (List[Document]): Previously retrieved documents
-            - answer (str): Last generated response
-        vector_store (PGVectorStore): PostgreSQL vector store for semantic search
+            - messages (List[BaseMessage]): The complete conversation history
+            - context (List[Document]): Previously retrieved reference documents
+            - answer (str): The last generated response
+        vector_store (PGVectorStore): Vector database instance for semantic
+         document search
 
     Returns:
-        Dict[str, List[Document]]: Dictionary with key "context" containing the most
-            relevant documents for the query
+        Dict[str, List[Document]]: Dictionary containing retrieved documents
+        under "context" key, with documents sorted by relevance and deduplicated by
+        source
 
-    The function:
-    1. Extracts the latest user question from conversation history
-    2. Uses LLM to extract key terms and concepts from the question
-    3. Augments search terms with common system keywords
-    4. Performs semantic similarity search to find relevant documents
-    5. Returns top matching documents as context for answer generation
+    Process Flow:
+    1. Extracts the most recent user question from the conversation
+    2. Uses an LLM to analyze the question and extract relevant search terms
+    3. Combines extracted terms with predefined system keywords
+    4. Performs semantic similarity search for each search term
+    5. Deduplicates results based on document sources
+    6. Returns unique, relevant documents as context
 
-    Notes:
-        - Uses defenition_prompt to extract search terms from question
-        - Adds system-specific keywords to improve document retrieval
-        - Returns top 10 most semantically similar documents
+    Implementation Details:
+    - Utilizes defenition_prompt to extract meaningful search terms
+    - Includes system-specific keywords (ScaleDPSession, DataToImage, show_image)
+    - Performs incremental searches with both extracted and predefined terms
+    - Maintains result uniqueness by tracking document sources
+    - Prioritizes more recent/relevant search terms in the search order
     """
-    # Get latest question from conversation
+    # Extract the latest user question from the conversation history
     question: str = state["messages"][-1].content[0]["text"]  # type: ignore
 
-    # Extract key terms using LLM
+    # Use LLM to analyze and extract key concepts from the question
     messages = defenition_prompt.invoke({"question": question})
     response = retrieve_llm.invoke(messages.to_messages())
 
-    # Add system keywords to search terms
-    defenitions = response.content[0] + (  # type: ignore
-        ", ScaleDPSession, DataToImage, show_image,how_text"
-    )
+    # Define core system keywords and combine with extracted terms
+    predefined_context = ["ScaleDPSession", "DataToImage", "show_image"]
+    defenitions = response.content.split(",")  # type: ignore
 
-    # Perform semantic search
-    retrieved_docs: List[Document] = await vector_store.asimilarity_search(
-        defenitions,
-        k=10,
-    )
+    # Log extracted terms for debugging and monitoring
+    logging.info(f"Extracted defenitions: {defenitions}")
+
+    # Combine all search terms if definitions were successfully extracted
+    if defenitions:
+        predefined_context.extend(defenitions)
+
+    # Include the original question in the search terms
+    predefined_context.append(question)
+
+    # Initialize collections for document retrieval
+    retrieved_docs = []
+    seen_sources = set()
+
+    # Perform semantic search for each term, starting with most specific
+    for context in predefined_context[::-1]:
+        docs = await vector_store.asimilarity_search(
+            context,
+            k=3,  # Retrieve top 3 matches per term
+        )
+        # Deduplicate documents based on source
+        for doc in docs:
+            if doc.metadata["source"] not in seen_sources:
+                retrieved_docs.append(doc)
+                seen_sources.add(doc.metadata["source"])
 
     return {"context": retrieved_docs}
 
@@ -106,7 +131,6 @@ async def generate(state: State, db_session: AsyncSession) -> Dict[str, Any]:
 
     # Fetch full document contents from database
     file_contents: List[str] = []
-    ##async with async_session() as session:
     for doc in state["context"]:
         document_file: DocumentFileModel | None = await db_session.get(
             DocumentFileModel,
