@@ -66,17 +66,26 @@ async def chat(
         Yields:
             str: Formatted JSON strings containing the AI's responses.
         """
+        # Stream both updates and messages from the graph processing
         async for stream_mode, chunk in graph.astream(
             {"messages": messages},
             config=config,
             stream_mode=["updates", "messages"],
         ):
+            # Handle retrieval updates from the vector store
             if stream_mode == "updates":
+                # Cast chunk to dictionary containing State objects
                 updates: dict[str, State] = chunk  # type: ignore
-                # Handle updates
+
+                # Check if we have retrieval results with context
                 if "retrieve" in updates and "context" in updates["retrieve"]:
+                    # Extract metadata from retrieved documents
                     context = [item.metadata for item in updates["retrieve"]["context"]]
+
+                    # Yield the first 10 context items as source references
                     for item in context[0:10]:
+                        # Format each context item as a citation event
+                        # prefix 'h:' indicates a citation/reference
                         yield "h:{text}\n".format(
                             text=json.dumps(
                                 {
@@ -87,10 +96,15 @@ async def chat(
                                 },
                             ),
                         )
+            # Handle message updates from the AI
             else:
-                # Handle messages
+                # Unpack the message event and its metadata
                 event, metadata = chunk  # type: ignore
+
+                # Only yield messages tagged as coming from the generator
                 if "generator" in metadata.get("tags", []):  # type: ignore
+                    # Format the AI's message content as a text event
+                    # prefix '0:' indicates a text message
                     yield "0:{text}\n".format(text=json.dumps(event.content))  # type: ignore
 
     # Create and configure the streaming response
