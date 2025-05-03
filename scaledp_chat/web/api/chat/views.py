@@ -77,11 +77,15 @@ async def chat(
                 if "retrieve" in updates and "context" in updates["retrieve"]:
                     context = [item.metadata for item in updates["retrieve"]["context"]]
                     for item in context[0:10]:
-                        yield (
-                            f'h:{{"sourceType": "url", "id": "'
-                            f'{item['start_index']}",'
-                            f' "url": "{item['source']}", "title": "'
-                            f'{item['source']}"}}\n'
+                        yield "h:{text}\n".format(
+                            text=json.dumps(
+                                {
+                                    "sourceType": "url",
+                                    "id": "",
+                                    "url": item["source"],
+                                    "title": item["source"],
+                                },
+                            ),
                         )
             else:
                 # Handle messages
