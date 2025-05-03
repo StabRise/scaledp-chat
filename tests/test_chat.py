@@ -24,8 +24,11 @@ def mock_graph_response() -> AsyncGenerator[str, None]:
 
     async def mock_stream() -> AsyncGenerator[str, None]:
         yield (
-            AIMessage(content="Hello! How can I help you today?"),
-            {"tags": "generator"},
+            "message",
+            (
+                AIMessage(content="Hello! How can I help you today?"),
+                {"tags": "generator"},
+            ),
         )
 
     return mock_stream()
