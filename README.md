@@ -1,6 +1,10 @@
 # ScaleDP Chat
 
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/6c67bee8a3c5478389d36b1239126b1c)](https://app.codacy.com/gh/StabRise/scaledp-chat/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
+[![Pydantic v2](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/pydantic/pydantic/main/docs/badge/v2.json)](https://pydantic.dev)
+[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
+[![Poetry](https://img.shields.io/endpoint?url=https://python-poetry.org/badge/v0.json)](https://python-poetry.org/)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 This is backend project for [ScaleDP](https://stabrise.com/scaledp/) Chat.
 Chat over the [ScaleDP git repository](https://github.com/StabRise/ScaleDP/).
