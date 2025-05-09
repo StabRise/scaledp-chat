@@ -115,7 +115,7 @@ class Settings(BaseSettings):
         env_file_encoding="utf-8",
     )
 
-    with_taskiq: bool = True
+    with_taskiq: bool = False
 
 
 settings = Settings()
