@@ -74,23 +74,23 @@ services:
     networks:
       - scaledp-network
 
-  rmq:
-    image: rabbitmq:3.9.16-alpine
-    hostname: "scaledp_chat-rmq"
-    restart: always
-    environment:
-      RABBITMQ_DEFAULT_USER: "guest"
-      RABBITMQ_DEFAULT_PASS: "guest"
-      RABBITMQ_DEFAULT_VHOST: "/"
-    ports:
-      - "5672:5672"
-    healthcheck:
-      test: rabbitmq-diagnostics check_running -q
-      interval: 3s
-      timeout: 3s
-      retries: 50
-    networks:
-      - scaledp-network
+#  rmq:
+#    image: rabbitmq:3.9.16-alpine
+#    hostname: "scaledp_chat-rmq"
+#    restart: always
+#    environment:
+#      RABBITMQ_DEFAULT_USER: "guest"
+#      RABBITMQ_DEFAULT_PASS: "guest"
+#      RABBITMQ_DEFAULT_VHOST: "/"
+#    ports:
+#      - "5672:5672"
+#    healthcheck:
+#      test: rabbitmq-diagnostics check_running -q
+#      interval: 3s
+#      timeout: 3s
+#      retries: 50
+#    networks:
+#      - scaledp-network
 
 
 
