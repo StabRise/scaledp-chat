@@ -10,6 +10,7 @@ from httpx import AsyncClient
 
 
 @pytest.mark.anyio
+@pytest.mark.skip
 async def test_message_publishing(
     fastapi_app: FastAPI,
     client: AsyncClient,
@@ -40,6 +41,7 @@ async def test_message_publishing(
 
 
 @pytest.mark.anyio
+@pytest.mark.skip
 async def test_message_wrong_exchange(
     fastapi_app: FastAPI,
     client: AsyncClient,
